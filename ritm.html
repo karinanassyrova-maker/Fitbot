@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ритм — трекер жизни</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F6F8;
+    --paper-2:#FFFFFF;
+    --ink:#15161A;
+    --ink-soft:#888C96;
+    --line:#E6E8EC;
+    --plum:#C4166B;
+    --plum-ink:#7A0E44;
+    --mustard:#FFAE1F;
+    --mustard-ink:#7A4E00;
+    --sky:#12A4C7;
+    --sky-ink:#0A6178;
+    --moss:#2FB86B;
+    --moss-ink:#186B3E;
+    --coral:#FF5A5F;
+    --coral-ink:#AD2B30;
+    --indigo:#6C4FE0;
+    --indigo-ink:#4127A8;
+    --brand:#2F6FED;
+    --brand-ink:#1741A6;
+    --teal:#0EAE9B;
+    --teal-ink:#066F62;
+    --radius:16px;
+    --font-display:'Fraunces',Georgia,serif;
+    --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --shadow-sm:0 1px 2px rgba(15,17,25,0.05);
+    --shadow-md:0 10px 28px -10px rgba(15,17,25,0.14),0 2px 6px rgba(15,17,25,0.05);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--font-sans);
+    -webkit-font-smoothing:antialiased;
+    display:flex;
+    min-height:100vh;
+  }
+  ::selection{background:var(--mustard);color:var(--ink);}
+  .spine{
+    width:104px;
+    flex-shrink:0;
+    background:var(--paper-2);
+    border-right:1px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    padding:24px 12px;
+    gap:4px;
+  }
+  .brand{
+    font-family:var(--font-display);
+    font-size:22px;
+    font-weight:600;
+    font-style:italic;
+    text-align:center;
+    color:var(--ink);
+    margin-bottom:20px;
+  }
+  .brand span{color:var(--brand);}
+  .tab{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:7px;
+    padding:12px 4px;
+    cursor:pointer;
+    border-radius:14px;
+    color:var(--ink-soft);
+    font-size:11px;
+    font-weight:500;
+    text-align:center;
+    line-height:1.2;
+    transition:background .15s,transform .15s;
+  }
+  .tab:hover{background:var(--paper);transform:translateY(-1px);}
+  .tab.active{
+    color:var(--ink);
+    font-weight:600;
+  }
+  .tab .dot{width:9px;height:9px;border-radius:50%;}
+  .tab[data-tab="finance"].active{background:rgba(47,184,107,0.14);color:var(--moss-ink);}
+  .tab[data-tab="steps"].active{background:rgba(18,164,199,0.14);color:var(--sky-ink);}
+  .tab[data-tab="nutrition"].active{background:rgba(255,174,31,0.16);color:var(--mustard-ink);}
+  .tab[data-tab="ai"].active{background:rgba(196,22,107,0.14);color:var(--plum-ink);}
+  .tab[data-tab="tracker"].active{background:rgba(255,90,95,0.14);color:var(--coral-ink);}
+  .tab[data-tab="calendar"].active{background:rgba(108,79,224,0.14);color:var(--indigo-ink);}
+  .tab[data-tab="blog"].active{background:var(--paper);color:var(--ink);}
+  .tab[data-tab="home"].active{background:rgba(47,111,237,0.14);color:var(--brand-ink);}
+  .tab[data-tab="profile"].active{background:rgba(14,174,155,0.14);color:var(--teal-ink);}
+  .tab[data-tab="finance"] .dot{background:var(--moss);}
+  .tab[data-tab="steps"] .dot{background:var(--sky);}
+  .tab[data-tab="nutrition"] .dot{background:var(--mustard);}
+  .tab[data-tab="ai"] .dot{background:var(--plum);}
+  .tab[data-tab="tracker"] .dot{background:var(--coral);}
+  .tab[data-tab="calendar"] .dot{background:var(--indigo);}
+  .tab[data-tab="blog"] .dot{background:var(--ink);}
+  .tab[data-tab="home"] .dot{background:var(--brand);}
+  .tab[data-tab="profile"] .dot{background:var(--teal);}
+
+  main{flex:1;min-width:0;padding:32px 36px 60px;max-width:760px;}
+  .today{
+    font-size:13px;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+    text-transform:capitalize;
+    font-weight:500;
+  }
+  h1{
+    font-family:var(--font-display);
+    font-weight:600;
+    font-size:30px;
+    margin:0 0 20px;
+    letter-spacing:-0.01em;
+  }
+  .card{
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    box-shadow:var(--shadow-sm);
+    border-radius:var(--radius);
+    padding:20px 22px;
+    margin-bottom:16px;
+  }
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+  .row > *{flex:1;min-width:110px;}
+  label{font-size:12px;color:var(--ink-soft);display:block;margin-bottom:4px;font-weight:500;}
+  input,select,textarea{
+    width:100%;
+    font-size:14px;
+    padding:9px 12px;
+    border:1px solid var(--line);
+    border-radius:10px;
+    background:#fff;
+    color:var(--ink);
+    font-family:inherit;
+    transition:border-color .15s;
+  }
+  input:focus,select:focus,textarea:focus{outline:none;border-color:var(--brand);box-shadow:0 0 0 3px rgba(47,111,237,0.14);}
+  textarea{resize:vertical;min-height:70px;}
+  button{
+    font-family:inherit;
+    font-size:14px;
+    font-weight:600;
+    padding:10px 18px;
+    border-radius:12px;
+    border:none;
+    background:var(--brand);
+    color:#fff;
+    cursor:pointer;
+    flex:none !important;
+    transition:transform .12s,opacity .12s,box-shadow .12s;
+  }
+  button:hover{transform:translateY(-1px);box-shadow:var(--shadow-md);}
+  button:active{transform:translateY(0);}
+  button.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);}
+  button.ghost:hover{box-shadow:none;background:var(--paper);}
+  .btn-row{display:flex;gap:8px;margin-top:12px;}
+  .muted{color:var(--ink-soft);font-size:13px;}
+  .list{display:flex;flex-direction:column;gap:0;}
+  .list-item{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;gap:10px;
+  }
+  .list-item:last-child{border-bottom:none;}
+  button.del{cursor:pointer;color:var(--ink-soft);font-size:12px;border:none;background:none;padding:2px 6px;font-weight:500;}
+  button.del:hover{color:var(--coral-ink);}
+  .tag{
+    display:inline-block;font-size:11px;padding:3px 10px;border-radius:20px;
+    background:rgba(47,184,107,0.15);color:var(--moss-ink);font-weight:600;
+  }
+  .stat-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .stat{
+    background:var(--paper-2);border:1px solid var(--line);box-shadow:var(--shadow-sm);border-radius:var(--radius);
+    padding:14px 18px;flex:1;min-width:130px;
+  }
+  .stat .num{font-family:var(--font-display);font-size:24px;font-weight:600;}
+  .stat .lbl{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .bar-track{background:var(--line);border-radius:20px;height:10px;overflow:hidden;margin-top:6px;}
+  .bar-fill{height:100%;border-radius:20px;transition:width .3s;}
+  .sticky-bar{
+    position:sticky;top:0;z-index:5;
+    background:var(--mustard);
+    color:var(--mustard-ink);
+    border-radius:var(--radius);
+    padding:14px 18px;
+    margin-bottom:18px;
+    display:flex;gap:18px;flex-wrap:wrap;
+    font-size:13px;font-weight:500;
+    box-shadow:var(--shadow-md);
+  }
+  .sticky-bar b{font-size:16px;font-family:var(--font-display);}
+  .subtab-row{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap;}
+  .subtab{
+    padding:7px 16px;border-radius:20px;border:1px solid var(--line);
+    font-size:13px;font-weight:500;cursor:pointer;background:var(--paper-2);color:var(--ink-soft);transition:all .15s;
+  }
+  .subtab.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+  .empty{color:var(--ink-soft);font-size:13px;padding:14px 0;font-style:italic;}
+  .chat-wrap{display:flex;flex-direction:column;height:520px;}
+  .chat-log{flex:1;overflow-y:auto;padding:6px 2px;display:flex;flex-direction:column;gap:10px;}
+  .msg{max-width:82%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.5;white-space:pre-wrap;}
+  .msg.user{align-self:flex-end;background:var(--ink);color:#fff;border-bottom-right-radius:4px;}
+  .msg.assistant{align-self:flex-start;background:var(--paper-2);border:1px solid var(--line);box-shadow:var(--shadow-sm);border-bottom-left-radius:4px;}
+  .chat-input-row{display:flex;gap:8px;margin-top:10px;}
+  .chat-input-row textarea{min-height:44px;max-height:120px;}
+  .book-item{border:1px solid var(--line);box-shadow:var(--shadow-sm);border-radius:12px;padding:12px 14px;margin-bottom:8px;background:var(--paper-2);}
+  .book-title{font-weight:600;font-size:14px;}
+  .check-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;}
+  .check-item{
+    display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:12px;
+    padding:10px 12px;font-size:13px;background:var(--paper-2);cursor:pointer;transition:border-color .15s;
+  }
+  .check-item:hover{border-color:var(--coral);}
+  .check-item input{width:auto;}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .cal-head .nav-btn{padding:7px 14px;font-size:13px;}
+  .cal-month{font-family:var(--font-display);font-weight:600;font-size:18px;text-transform:capitalize;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+  .cal-dow{font-size:11px;color:var(--ink-soft);text-align:center;padding-bottom:6px;font-weight:500;}
+  .cal-cell{
+    aspect-ratio:1;border-radius:12px;border:1px solid var(--line);background:var(--paper);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    cursor:pointer;font-size:13px;position:relative;transition:all .15s;
+  }
+  .cal-cell.empty{visibility:hidden;}
+  .cal-cell:hover{border-color:var(--indigo);transform:translateY(-1px);}
+  .cal-cell.selected{background:var(--indigo);color:#fff;border-color:var(--indigo);}
+  .cal-cell.today:not(.selected){border-color:var(--ink);font-weight:700;}
+  .cal-dots{display:flex;gap:2px;}
+  .cal-dots span{width:5px;height:5px;border-radius:50%;background:var(--indigo);}
+  .cal-cell.selected .cal-dots span{background:#fff;}
+  .cal-cell.done .cal-dots span{background:var(--moss);}
+  .cal-cell.selected.done .cal-dots span{background:#fff;}
+  .workout-item{
+    display:flex;align-items:flex-start;gap:10px;border-bottom:1px solid var(--line);padding:10px 0;
+  }
+  .workout-item:last-child{border-bottom:none;}
+  .workout-item input[type=checkbox]{width:auto;margin-top:3px;}
+  .workout-item .wi-title{font-weight:600;font-size:14px;}
+  .workout-item.done .wi-title{text-decoration:line-through;color:var(--ink-soft);}
+  .quote-card{
+    background:var(--brand);color:#fff;border-radius:20px;
+    padding:26px 28px;margin-bottom:20px;box-shadow:var(--shadow-md);
+  }
+  .quote-text{font-family:var(--font-display);font-weight:500;font-size:21px;line-height:1.45;font-style:italic;margin-bottom:12px;}
+  .quote-foot{display:flex;justify-content:space-between;align-items:center;font-size:12px;opacity:0.85;font-weight:500;}
+  .quote-foot button{background:rgba(255,255,255,0.18);border:1px solid rgba(255,255,255,0.35);color:#fff;padding:6px 14px;font-size:12px;}
+  .quote-foot button:hover{background:rgba(255,255,255,0.28);box-shadow:none;transform:none;}
+  .fill-row{margin-bottom:14px;}
+  .fill-head{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;}
+  .fill-head .fname{font-weight:600;}
+  .goal-item{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:9px 0;font-size:14px;}
+  .goal-item:last-child{border-bottom:none;}
+  .weight-row{display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--line);padding:8px 0;font-size:14px;}
+  .weight-row:last-child{border-bottom:none;}
+  .custom-item{border:1px solid var(--line);box-shadow:var(--shadow-sm);border-radius:12px;padding:12px 14px;margin-bottom:8px;background:var(--paper-2);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .custom-item .ci-name{font-weight:600;font-size:14px;}
+  .custom-item .ci-desc{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .custom-item label{display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;white-space:nowrap;}
+  .custom-item input[type=checkbox]{width:auto;}
+  .blog-post{border-bottom:1px solid var(--line);padding:16px 0;}
+  .blog-post h3{margin:0 0 4px;font-family:var(--font-display);font-weight:600;font-size:19px;}
+  .blog-date{font-size:12px;color:var(--ink-soft);margin-bottom:6px;}
+  .blog-text{font-size:14px;line-height:1.6;white-space:pre-wrap;}
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px;}
+  @media (max-width:640px){
+    body{flex-direction:column;}
+    .spine{width:100%;flex-direction:row;overflow-x:auto;padding:10px 8px;gap:6px;}
+    .tab{flex-direction:row;padding:8px 14px;white-space:nowrap;border-radius:20px;}
+    main{padding:20px;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="spine" id="spine">
+  <div class="brand">Р<span>и</span>тм</div>
+  <div class="tab active" data-tab="home"><span class="dot"></span>Главная</div>
+  <div class="tab" data-tab="finance"><span class="dot"></span>Финансы</div>
+  <div class="tab" data-tab="steps"><span class="dot"></span>Шаги</div>
+  <div class="tab" data-tab="nutrition"><span class="dot"></span>Рацион</div>
+  <div class="tab" data-tab="ai"><span class="dot"></span>Ассистент</div>
+  <div class="tab" data-tab="tracker"><span class="dot"></span>Трекер</div>
+  <div class="tab" data-tab="calendar"><span class="dot"></span>Календарь</div>
+  <div class="tab" data-tab="profile"><span class="dot"></span>Мои данные</div>
+  <div class="tab" data-tab="blog"><span class="dot"></span>Блог</div>
+</nav>
+
+<main id="main"></main>
+
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script>
+if(window.Telegram && window.Telegram.WebApp){
+  Telegram.WebApp.ready();
+  Telegram.WebApp.expand();
+}
+const state = {
+  finance: { transactions: [] },
+  steps: { records: {} },
+  nutrition: { target: { cal: 2000, protein: 120, fat: 60, carb: 220 }, entries: [] },
+  trackers: { water: {}, books: [], skincare: {}, skincareTasks: null, custom: [], customLog: {} },
+  blog: { posts: [] },
+  chat: { messages: [] },
+  calendar: { workouts: [] },
+  home: { quoteText:'', quoteDate:'' },
+  profile: { height:null, weightLog: [], goals: [], notes: [] }
+};
+
+// Адрес Supabase Edge Function (прокси к Anthropic API)
+const AI_ENDPOINT = 'https://eeprvqjygoeixthzedpy.supabase.co/functions/v1/ai-assistant';
+
+let activeTab = 'home';
+let nutritionSubtab = 'today';
+let trackerSubtab = 'water';
+let financeSubtab = 'ops';
+let calView = null;
+let calSelected = null;
+
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+function fmtDate(iso){
+  const d = new Date(iso+'T00:00:00');
+  return d.toLocaleDateString('ru-RU', { day:'numeric', month:'long', year:'numeric' });
+}
+function isWeekend(iso){
+  const day = new Date(iso+'T00:00:00').getDay();
+  return day === 0 || day === 6;
+}
+function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,7); }
+function money(n){ return Number(n).toLocaleString('ru-RU') + ' ₸'; }
+
+function loadAll(){
+  const keys = ['finance','steps','nutrition','trackers','blog','chat','calendar','home','profile'];
+  for(const k of keys){
+    try{
+      const raw = localStorage.getItem('rhythm-'+k);
+      if(raw) state[k] = JSON.parse(raw);
+    }catch(e){ /* not found yet, keep default */ }
+  }
+  if(!state.finance.transactions){
+    const legacy = state.finance.expenses || [];
+    state.finance.transactions = legacy.map(e=>({ ...e, type:'expense' }));
+    delete state.finance.expenses;
+  }
+  if(!state.trackers.custom) state.trackers.custom = [];
+  if(!state.trackers.customLog) state.trackers.customLog = {};
+  if(!state.trackers.skincareTasks) state.trackers.skincareTasks = ['Умывание утро','Умывание вечер','Крем','SPF','Маска'];
+  if(!state.calendar) state.calendar = { workouts: [] };
+  if(!state.home) state.home = { quoteText:'', quoteDate:'' };
+  if(!state.profile) state.profile = { height:null, weightLog: [], goals: [], notes: [] };
+  calView = { year: new Date().getFullYear(), month: new Date().getMonth() };
+  calSelected = todayISO();
+  render();
+  if(state.home.quoteDate !== todayISO()) fetchDailyQuote();
+}
+function save(key){
+  try{
+    localStorage.setItem('rhythm-'+key, JSON.stringify(state[key]));
+  }catch(e){ console.error('storage error', e); }
+}
+
+function switchTab(tab){
+  activeTab = tab;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.tab===tab));
+  render();
+}
+document.getElementById('spine').addEventListener('click', e=>{
+  const t = e.target.closest('.tab');
+  if(t) switchTab(t.dataset.tab);
+});
+
+function render(){
+  const main = document.getElementById('main');
+  main.innerHTML = `<div class="today">${fmtDate(todayISO())}</div>`;
+  if(activeTab==='home') renderHome(main);
+  else if(activeTab==='finance') renderFinance(main);
+  else if(activeTab==='steps') renderSteps(main);
+  else if(activeTab==='nutrition') renderNutrition(main);
+  else if(activeTab==='ai') renderAI(main);
+  else if(activeTab==='tracker') renderTracker(main);
+  else if(activeTab==='calendar') renderCalendar(main);
+  else if(activeTab==='profile') renderProfile(main);
+  else if(activeTab==='blog') renderBlog(main);
+}
+
+/* ---------- FINANCE ---------- */
+const expenseCats = ['Еда','Транспорт','Быт','Здоровье','Развлечения','Одежда','Другое'];
+const incomeCats = ['Зарплата','Фриланс','Подарок','Другое'];
+
+function renderFinance(main){
+  const today = todayISO();
+  const monthPrefix = today.slice(0,7);
+  const tx = state.finance.transactions;
+
+  main.innerHTML += `
+    <h1>Финансы</h1>
+    <div class="subtab-row">
+      <div class="subtab ${financeSubtab==='ops'?'active':''}" data-sub="ops">Операции</div>
+      <div class="subtab ${financeSubtab==='analytics'?'active':''}" data-sub="analytics">Аналитика за месяц</div>
+    </div>
+  `;
+  if(financeSubtab==='analytics'){ renderFinanceAnalytics(main, tx, monthPrefix); return wireFinanceSubtabs(main); }
+
+  const todayExpense = tx.filter(t=>t.date===today && t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
+  const todayIncome = tx.filter(t=>t.date===today && t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
+
+  main.innerHTML += `
+    <div class="stat-row">
+      <div class="stat"><div class="num" style="color:var(--coral-ink);">${money(todayExpense)}</div><div class="lbl">расходы сегодня</div></div>
+      <div class="stat"><div class="num" style="color:var(--moss-ink);">${money(todayIncome)}</div><div class="lbl">доходы сегодня</div></div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <div><label>Тип</label>
+          <select id="f-type">
+            <option value="expense">Расход</option>
+            <option value="income">Доход</option>
+          </select>
+        </div>
+        <div><label>Сумма, ₸</label><input type="number" id="f-amount" placeholder="0"></div>
+        <div><label>Категория</label>
+          <select id="f-category">${expenseCats.map(c=>`<option>${c}</option>`).join('')}</select>
+        </div>
+        <div><label>Заметка</label><input type="text" id="f-note" placeholder="необязательно"></div>
+      </div>
+      <div class="btn-row"><button id="f-add">Добавить</button></div>
+    </div>
+    <div class="card">
+      <div class="muted" style="margin-bottom:8px;">Последние операции</div>
+      <div class="list" id="f-list">
+        ${tx.slice().reverse().slice(0,40).map(t=>`
+          <div class="list-item">
+            <span><span class="tag" style="${t.type==='income'?'background:rgba(47,184,107,0.15);color:var(--moss-ink);':'background:rgba(255,90,95,0.15);color:var(--coral-ink);'}">${t.category}</span> ${t.note?('&nbsp;'+t.note):''}</span>
+            <span style="display:flex;align-items:center;gap:10px;">
+              <span style="color:${t.type==='income'?'var(--moss-ink)':'var(--coral-ink)'};">${t.type==='income'?'+':'−'}${money(t.amount)}</span>
+              <button class="del" data-id="${t.id}">убрать</button>
+            </span>
+          </div>
+        `).join('') || '<div class="empty">Пока нет операций</div>'}
+      </div>
+    </div>
+  `;
+  const typeSel = main.querySelector('#f-type');
+  const catSel = main.querySelector('#f-category');
+  typeSel.onchange = ()=>{
+    const cats = typeSel.value==='income' ? incomeCats : expenseCats;
+    catSel.innerHTML = cats.map(c=>`<option>${c}</option>`).join('');
+  };
+  main.querySelector('#f-add').onclick = ()=>{
+    const amount = parseFloat(main.querySelector('#f-amount').value);
+    if(!amount || amount<=0) return;
+    const type = typeSel.value;
+    const category = catSel.value;
+    const note = main.querySelector('#f-note').value.trim();
+    state.finance.transactions.push({ id:uid(), date:today, type, amount, category, note });
+    save('finance'); render();
+  };
+  main.querySelectorAll('#f-list .del').forEach(b=>{
+    b.onclick = ()=>{
+      state.finance.transactions = state.finance.transactions.filter(t=>t.id!==b.dataset.id);
+      save('finance'); render();
+    };
+  });
+  wireFinanceSubtabs(main);
+}
+
+function wireFinanceSubtabs(main){
+  main.querySelectorAll('.subtab').forEach(s=>{
+    s.onclick = ()=>{ financeSubtab = s.dataset.sub; render(); };
+  });
+}
+
+function renderFinanceAnalytics(main, tx, monthPrefix){
+  const monthTx = tx.filter(t=>t.date.startsWith(monthPrefix));
+  const income = monthTx.filter(t=>t.type==='income').reduce((s,t)=>s+Number(t.amount),0);
+  const expense = monthTx.filter(t=>t.type==='expense').reduce((s,t)=>s+Number(t.amount),0);
+  const balance = income - expense;
+  const daysPassed = new Date().getDate();
+  const avgDaily = daysPassed ? expense/daysPassed : 0;
+
+  const byCat = {};
+  monthTx.filter(t=>t.type==='expense').forEach(t=>{ byCat[t.category]=(byCat[t.category]||0)+Number(t.amount); });
+  const byIncomeCat = {};
+  monthTx.filter(t=>t.type==='income').forEach(t=>{ byIncomeCat[t.category]=(byIncomeCat[t.category]||0)+Number(t.amount); });
+  const maxCat = Math.max(1, ...Object.values(byCat));
+
+  main.innerHTML += `
+    <div class="stat-row">
+      <div class="stat"><div class="num" style="color:var(--moss-ink);">${money(income)}</div><div class="lbl">доходы за месяц</div></div>
+      <div class="stat"><div class="num" style="color:var(--coral-ink);">${money(expense)}</div><div class="lbl">расходы за месяц</div></div>
+      <div class="stat"><div class="num" style="color:${balance>=0?'var(--moss-ink)':'var(--coral-ink)'};">${balance>=0?'+':''}${money(balance)}</div><div class="lbl">баланс</div></div>
+      <div class="stat"><div class="num">${money(Math.round(avgDaily))}</div><div class="lbl">расход в день, в среднем</div></div>
+    </div>
+    <div class="card">
+      <div class="muted" style="margin-bottom:10px;">Расходы по категориям</div>
+      ${Object.keys(byCat).length ? Object.entries(byCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`
+        <div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px;">
+            <span>${c}</span><span>${money(v)} · ${Math.round(v/expense*100)||0}%</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${v/maxCat*100}%;background:var(--coral);"></div></div>
+        </div>
+      `).join('') : '<div class="empty">Нет расходов в этом месяце</div>'}
+    </div>
+    <div class="card">
+      <div class="muted" style="margin-bottom:8px;">Источники дохода</div>
+      ${Object.keys(byIncomeCat).length ? Object.entries(byIncomeCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`
+        <div class="list-item"><span>${c}</span><span>${money(v)}</span></div>
+      `).join('') : '<div class="empty">Нет доходов в этом месяце</div>'}
+    </div>
+  `;
+}
+
+/* ---------- STEPS ---------- */
+function renderSteps(main){
+  const today = todayISO();
+  const goal = isWeekend(today) ? 15000 : 12000;
+  const current = state.steps.records[today] || 0;
+  const pct = Math.min(100, Math.round(current/goal*100));
+  const last7 = [];
+  for(let i=6;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const iso = d.toISOString().slice(0,10);
+    last7.push({ iso, steps: state.steps.records[iso]||0, goal: isWeekend(iso)?15000:12000 });
+  }
+  main.innerHTML += `
+    <h1>Шаги</h1>
+    <div class="card">
+      <div class="row" style="align-items:flex-end;">
+        <div><label>Шаги сегодня (цель ${goal.toLocaleString('ru-RU')})</label>
+          <input type="number" id="s-input" value="${current||''}" placeholder="0">
+        </div>
+        <button id="s-save">Сохранить</button>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--sky);"></div></div>
+      <div class="muted" style="margin-top:6px;">${pct}% от цели ${isWeekend(today)?'(выходной — 15 000)':'(будний — 12 000)'}</div>
+    </div>
+    <div class="card">
+      <div class="muted" style="margin-bottom:10px;">Последние 7 дней</div>
+      ${last7.map(d=>{
+        const p = Math.min(100, Math.round(d.steps/d.goal*100));
+        return `<div style="margin-bottom:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:13px;">
+            <span>${new Date(d.iso+'T00:00:00').toLocaleDateString('ru-RU',{weekday:'short',day:'numeric',month:'short'})}</span>
+            <span>${d.steps.toLocaleString('ru-RU')} / ${d.goal.toLocaleString('ru-RU')}</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="width:${p}%;background:${p>=100?'var(--moss)':'var(--sky)'};"></div></div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  main.querySelector('#s-save').onclick = ()=>{
+    const v = parseInt(main.querySelector('#s-input').value)||0;
+    state.steps.records[today] = v;
+    save('steps'); render();
+  };
+}
+
+/* ---------- NUTRITION ---------- */
+function renderNutrition(main){
+  const today = todayISO();
+  const t = state.nutrition.target;
+  const todays = state.nutrition.entries.filter(e=>e.date===today);
+  const sum = todays.reduce((a,e)=>({
+    cal:a.cal+Number(e.cal), protein:a.protein+Number(e.protein),
+    fat:a.fat+Number(e.fat), carb:a.carb+Number(e.carb)
+  }), {cal:0,protein:0,fat:0,carb:0});
+
+  main.innerHTML += `
+    <h1>Рацион</h1>
+    <div class="sticky-bar">
+      <span><b>${Math.round(sum.cal)}</b> / ${t.cal} ккал</span>
+      <span>Б <b>${Math.round(sum.protein)}</b>/${t.protein} г</span>
+      <span>Ж <b>${Math.round(sum.fat)}</b>/${t.fat} г</span>
+      <span>У <b>${Math.round(sum.carb)}</b>/${t.carb} г</span>
+    </div>
+    <div class="subtab-row">
+      <div class="subtab ${nutritionSubtab==='today'?'active':''}" data-sub="today">Сегодня</div>
+      <div class="subtab ${nutritionSubtab==='target'?'active':''}" data-sub="target">Цель по БЖУ</div>
+    </div>
+  `;
+  if(nutritionSubtab==='target'){
+    main.innerHTML += `
+      <div class="card">
+        <div class="row">
+          <div><label>Калории</label><input type="number" id="t-cal" value="${t.cal}"></div>
+          <div><label>Белки, г</label><input type="number" id="t-protein" value="${t.protein}"></div>
+          <div><label>Жиры, г</label><input type="number" id="t-fat" value="${t.fat}"></div>
+          <div><label>Углеводы, г</label><input type="number" id="t-carb" value="${t.carb}"></div>
+        </div>
+        <div class="btn-row"><button id="t-save">Сохранить цель</button></div>
+      </div>
+    `;
+  } else {
+    main.innerHTML += `
+      <div class="card">
+        <div class="row">
+          <div style="min-width:180px;"><label>Блюдо</label><input type="text" id="n-name" placeholder="например, овсянка с ягодами"></div>
+          <div><label>Ккал</label><input type="number" id="n-cal"></div>
+          <div><label>Белки, г</label><input type="number" id="n-protein"></div>
+          <div><label>Жиры, г</label><input type="number" id="n-fat"></div>
+          <div><label>Углеводы, г</label><input type="number" id="n-carb"></div>
+        </div>
+        <div class="btn-row"><button id="n-add">Добавить в рацион</button></div>
+      </div>
+      <div class="card">
+        <div class="muted" style="margin-bottom:8px;">Сегодня съедено</div>
+        <div class="list" id="n-list">
+          ${todays.map(e=>`
+            <div class="list-item">
+              <span>${e.name}</span>
+              <span style="display:flex;align-items:center;gap:10px;">
+                <span class="muted">${e.cal} ккал · Б${e.protein} Ж${e.fat} У${e.carb}</span>
+                <button class="del" data-id="${e.id}">убрать</button>
+              </span>
+            </div>
+          `).join('') || '<div class="empty">Пока ничего не добавлено</div>'}
+        </div>
+      </div>
+    `;
+  }
+  main.querySelectorAll('.subtab').forEach(s=>{
+    s.onclick = ()=>{ nutritionSubtab = s.dataset.sub; render(); };
+  });
+  if(nutritionSubtab==='target'){
+    main.querySelector('#t-save').onclick = ()=>{
+      state.nutrition.target = {
+        cal: parseFloat(main.querySelector('#t-cal').value)||0,
+        protein: parseFloat(main.querySelector('#t-protein').value)||0,
+        fat: parseFloat(main.querySelector('#t-fat').value)||0,
+        carb: parseFloat(main.querySelector('#t-carb').value)||0
+      };
+      save('nutrition'); nutritionSubtab='today'; render();
+    };
+  } else {
+    main.querySelector('#n-add').onclick = ()=>{
+      const name = main.querySelector('#n-name').value.trim();
+      if(!name) return;
+      state.nutrition.entries.push({
+        id:uid(), date:today, name,
+        cal: parseFloat(main.querySelector('#n-cal').value)||0,
+        protein: parseFloat(main.querySelector('#n-protein').value)||0,
+        fat: parseFloat(main.querySelector('#n-fat').value)||0,
+        carb: parseFloat(main.querySelector('#n-carb').value)||0
+      });
+      save('nutrition'); render();
+    };
+    main.querySelectorAll('#n-list .del').forEach(b=>{
+      b.onclick = ()=>{
+        state.nutrition.entries = state.nutrition.entries.filter(e=>e.id!==b.dataset.id);
+        save('nutrition'); render();
+      };
+    });
+  }
+}
+
+/* ---------- AI ASSISTANT ---------- */
+function renderAI(main){
+  main.innerHTML += `
+    <h1>Ассистент</h1>
+    <div class="muted" style="margin-bottom:10px;">Рецепты, советы по финансам, идеи для рациона — спрашивай что угодно.</div>
+    <div class="chat-wrap">
+      <div class="chat-log" id="chat-log">
+        ${state.chat.messages.map(m=>`<div class="msg ${m.role}">${escapeHtml(m.content)}</div>`).join('') || '<div class="empty">Начни разговор — например, спроси рецепт ужина на заданные БЖУ.</div>'}
+      </div>
+      <div class="chat-input-row">
+        <textarea id="chat-input" placeholder="Напиши сообщение..."></textarea>
+        <button id="chat-send">Отправить</button>
+      </div>
+    </div>
+  `;
+  const log = main.querySelector('#chat-log');
+  log.scrollTop = log.scrollHeight;
+  const input = main.querySelector('#chat-input');
+  const sendBtn = main.querySelector('#chat-send');
+  input.addEventListener('keydown', e=>{
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendBtn.click(); }
+  });
+  sendBtn.onclick = async ()=>{
+    const text = input.value.trim();
+    if(!text) return;
+    state.chat.messages.push({ role:'user', content:text });
+    save('chat');
+    input.value='';
+    sendBtn.disabled = true; sendBtn.textContent='...';
+    render();
+    try{
+      const history = state.chat.messages.slice(-16).map(m=>({role:m.role, content:m.content}));
+      const response = await fetch(AI_ENDPOINT, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({
+          max_tokens:1000,
+          system:'Ты дружелюбный ассистент по образу жизни: помогаешь с рецептами под заданные БЖУ, даёшь практичные советы по личным финансам, привычкам, воде, чтению и уходу за собой. Отвечай на русском языке, кратко и по делу, без лишней воды.',
+          messages: history
+        })
+      });
+      const data = await response.json();
+      const textBlocks = (data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n');
+      state.chat.messages.push({ role:'assistant', content: textBlocks || 'Не получилось получить ответ, попробуй ещё раз.' });
+    }catch(e){
+      state.chat.messages.push({ role:'assistant', content:'Ошибка соединения. Попробуй ещё раз.' });
+    }
+    save('chat');
+    sendBtn.disabled = false; sendBtn.textContent='Отправить';
+    render();
+  };
+}
+function escapeHtml(s){
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+/* ---------- HOME ---------- */
+async function fetchDailyQuote(){
+  try{
+    const response = await fetch(AI_ENDPOINT, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        max_tokens:100,
+        system:'Ты даёшь одну короткую мотивационную фразу дня на русском языке — про здоровье, привычки, дисциплину или финансы. Только сама фраза, без кавычек, без пояснений, максимум одно предложение.',
+        messages:[{ role:'user', content:'Дай фразу дня.' }]
+      })
+    });
+    const data = await response.json();
+    const text = (data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join(' ').trim();
+    state.home.quoteText = text || 'Маленькие шаги каждый день складываются в большой результат.';
+  }catch(e){
+    state.home.quoteText = 'Маленькие шаги каждый день складываются в большой результат.';
+  }
+  state.home.quoteDate = todayISO();
+  save('home');
+  if(activeTab==='home') render();
+}
+
+function goalForDate(iso){ return isWeekend(iso) ? 15000 : 12000; }
+
+function computeMonthlyFill(){
+  const today = todayISO();
+  const monthPrefix = today.slice(0,7);
+  const daysPassed = new Date().getDate();
+
+  let stepsHit = 0;
+  for(let d=1; d<=daysPassed; d++){
+    const iso = `${monthPrefix}-${String(d).padStart(2,'0')}`;
+    if((state.steps.records[iso]||0) >= goalForDate(iso)) stepsHit++;
+  }
+  const stepsPct = Math.round(stepsHit/daysPassed*100);
+
+  const nutritionDays = new Set(state.nutrition.entries.filter(e=>e.date.startsWith(monthPrefix)).map(e=>e.date)).size;
+  const nutritionPct = Math.round(nutritionDays/daysPassed*100);
+
+  let waterHit=0, skincareHit=0;
+  for(let d=1; d<=daysPassed; d++){
+    const iso = `${monthPrefix}-${String(d).padStart(2,'0')}`;
+    if((state.trackers.water[iso]||0) >= 8) waterHit++;
+    const tasksForDay = state.trackers.skincareTasks;
+    const doneForDay = state.trackers.skincare[iso] || [];
+    if(tasksForDay.length && tasksForDay.every(t=>doneForDay.includes(t))) skincareHit++;
+  }
+  let customPct = null;
+  if(state.trackers.custom.length){
+    const perItem = state.trackers.custom.map(c=>{
+      let hit=0;
+      for(let d=1; d<=daysPassed; d++){
+        const iso = `${monthPrefix}-${String(d).padStart(2,'0')}`;
+        if((state.trackers.customLog[iso]||[]).includes(c.id)) hit++;
+      }
+      return hit/daysPassed*100;
+    });
+    customPct = perItem.reduce((a,b)=>a+b,0)/perItem.length;
+  }
+  const trackerParts = [Math.round(waterHit/daysPassed*100), Math.round(skincareHit/daysPassed*100)];
+  if(customPct!==null) trackerParts.push(Math.round(customPct));
+  const trackerPct = Math.round(trackerParts.reduce((a,b)=>a+b,0)/trackerParts.length);
+
+  const monthWorkouts = state.calendar.workouts.filter(w=>w.date.startsWith(monthPrefix));
+  const workoutsPct = monthWorkouts.length ? Math.round(monthWorkouts.filter(w=>w.done).length/monthWorkouts.length*100) : 0;
+
+  const financeDays = new Set(state.finance.transactions.filter(t=>t.date.startsWith(monthPrefix)).map(t=>t.date)).size;
+  const financePct = Math.round(financeDays/daysPassed*100);
+
+  return [
+    { name:'Шаги', pct:stepsPct, color:'var(--sky)' },
+    { name:'Рацион', pct:nutritionPct, color:'var(--mustard)' },
+    { name:'Трекер (вода, уход, свои)', pct:trackerPct, color:'var(--coral)' },
+    { name:'Тренировки', pct:workoutsPct, color:'var(--indigo)' },
+    { name:'Финансы', pct:financePct, color:'var(--moss)' }
+  ];
+}
+
+function renderHome(main){
+  main.innerHTML += `<h1>Главная</h1>`;
+  main.innerHTML += `
+    <div class="quote-card">
+      <div class="quote-text">${escapeHtml(state.home.quoteText || 'Фраза дня загружается...')}</div>
+      <div class="quote-foot">
+        <span>Фраза дня</span>
+        <button id="q-refresh">Обновить</button>
+      </div>
+    </div>
+  `;
+  const fill = computeMonthlyFill();
+  main.innerHTML += `
+    <div class="card">
+      <div class="muted" style="margin-bottom:12px;">Мой трекинг — заполняемость за месяц</div>
+      ${fill.map(f=>`
+        <div class="fill-row">
+          <div class="fill-head"><span class="fname">${f.name}</span><span>${f.pct}%</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,Math.max(0,f.pct))}%;background:${f.color};"></div></div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  main.querySelector('#q-refresh').onclick = ()=>{
+    main.querySelector('#q-refresh').textContent = '...';
+    fetchDailyQuote();
+  };
+}
+
+/* ---------- MY DATA (PROFILE) ---------- */
+function renderProfile(main){
+  const p = state.profile;
+  main.innerHTML += `
+    <h1>Мои данные</h1>
+    <div class="card">
+      <div class="row">
+        <div><label>Рост, см</label><input type="number" id="p-height" value="${p.height||''}" placeholder="например, 165"></div>
+        <div><label>Вес сегодня, кг</label><input type="number" id="p-weight" step="0.1" placeholder="например, 60.5"></div>
+      </div>
+      <div class="btn-row">
+        <button id="p-save-height">Сохранить рост</button>
+        <button id="p-add-weight">Записать вес</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="muted" style="margin-bottom:8px;">История веса</div>
+      ${p.weightLog.slice().reverse().map(w=>`
+        <div class="weight-row">
+          <span>${fmtDate(w.date)}</span>
+          <span style="display:flex;align-items:center;gap:10px;">
+            <span>${w.weight} кг</span>
+            <button class="del" data-id="${w.id}">убрать</button>
+          </span>
+        </div>
+      `).join('') || '<div class="empty">Пока нет записей веса</div>'}
+    </div>
+    <div class="card">
+      <div class="muted" style="margin-bottom:8px;">Цели на год</div>
+      <div id="g-list">
+        ${p.goals.map(g=>`
+          <div class="goal-item">
+            <label style="display:flex;align-items:center;gap:8px;flex:1;">
+              <input type="checkbox" class="g-done" data-id="${g.id}" ${g.done?'checked':''} style="width:auto;">
+              <span style="${g.done?'text-decoration:line-through;color:var(--ink-soft);':''}">${escapeHtml(g.text)}</span>
+            </label>
+            <button class="del" data-id="${g.id}">убрать</button>
+          </div>
+        `).join('') || '<div class="empty">Пока нет целей</div>'}
+      </div>
+      <div class="row" style="margin-top:10px;">
+        <input type="text" id="g-new" placeholder="например, пробежать полумарафон">
+        <button id="g-add">Добавить цель</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="muted" style="margin-bottom:8px;">Свои корректировки</div>
+      <div id="n-list-p">
+        ${p.notes.slice().reverse().map(n=>`
+          <div class="weight-row" style="align-items:flex-start;">
+            <div>
+              <div class="muted">${fmtDate(n.date)}</div>
+              <div>${escapeHtml(n.text)}</div>
+            </div>
+            <button class="del" data-id="${n.id}">убрать</button>
+          </div>
+        `).join('') || '<div class="empty">Пока нет корректировок</div>'}
+      </div>
+      <div style="margin-top:10px;"><textarea id="n-new-p" placeholder="например: снизить цель по шагам до 9000 на время травмы"></textarea></div>
+      <div class="btn-row"><button id="n-add-p">Добавить корректировку</button></div>
+    </div>
+  `;
+  main.querySelector('#p-save-height').onclick = ()=>{
+    state.profile.height = parseFloat(main.querySelector('#p-height').value)||null;
+    save('profile'); render();
+  };
+  main.querySelector('#p-add-weight').onclick = ()=>{
+    const w = parseFloat(main.querySelector('#p-weight').value);
+    if(!w || w<=0) return;
+    state.profile.weightLog.push({ id:uid(), date:todayISO(), weight:w });
+    save('profile'); render();
+  };
+  main.querySelectorAll('.weight-row .del').forEach(b=>{
+    b.onclick = ()=>{ state.profile.weightLog = state.profile.weightLog.filter(w=>w.id!==b.dataset.id); save('profile'); render(); };
+  });
+  main.querySelector('#g-add').onclick = ()=>{
+    const text = main.querySelector('#g-new').value.trim();
+    if(!text) return;
+    state.profile.goals.push({ id:uid(), text, done:false });
+    save('profile'); render();
+  };
+  main.querySelectorAll('#g-list .del').forEach(b=>{
+    b.onclick = ()=>{ state.profile.goals = state.profile.goals.filter(g=>g.id!==b.dataset.id); save('profile'); render(); };
+  });
+  main.querySelectorAll('.g-done').forEach(cb=>{
+    cb.onchange = ()=>{
+      const g = state.profile.goals.find(x=>x.id===cb.dataset.id);
+      if(g){ g.done = cb.checked; save('profile'); render(); }
+    };
+  });
+  main.querySelector('#n-add-p').onclick = ()=>{
+    const text = main.querySelector('#n-new-p').value.trim();
+    if(!text) return;
+    state.profile.notes.push({ id:uid(), date:todayISO(), text });
+    save('profile'); render();
+  };
+  main.querySelectorAll('#n-list-p .del').forEach(b=>{
+    b.onclick = ()=>{ state.profile.notes = state.profile.notes.filter(n=>n.id!==b.dataset.id); save('profile'); render(); };
+  });
+}
+
+/* ---------- TRACKER (water / books / skincare) ---------- */
+function renderTracker(main){
+  main.innerHTML += `
+    <h1>Трекер</h1>
+    <div class="subtab-row">
+      <div class="subtab ${trackerSubtab==='water'?'active':''}" data-sub="water">Вода</div>
+      <div class="subtab ${trackerSubtab==='books'?'active':''}" data-sub="books">Книги</div>
+      <div class="subtab ${trackerSubtab==='skincare'?'active':''}" data-sub="skincare">Уход</div>
+      <div class="subtab ${trackerSubtab==='custom'?'active':''}" data-sub="custom">Свои пункты</div>
+    </div>
+  `;
+  const today = todayISO();
+  if(trackerSubtab==='water'){
+    const cur = state.trackers.water[today] || 0;
+    const goal = 8;
+    main.innerHTML += `
+      <div class="card">
+        <div class="stat-row">
+          <div class="stat"><div class="num">${cur} / ${goal}</div><div class="lbl">стаканов сегодня</div></div>
+        </div>
+        <div class="bar-track"><div class="bar-fill" style="width:${Math.min(100,cur/goal*100)}%;background:var(--sky);"></div></div>
+        <div class="btn-row">
+          <button class="ghost" id="w-minus">− стакан</button>
+          <button id="w-plus">+ стакан</button>
+        </div>
+      </div>
+    `;
+    main.querySelector('#w-plus').onclick = ()=>{ state.trackers.water[today]=cur+1; save('trackers'); render(); };
+    main.querySelector('#w-minus').onclick = ()=>{ state.trackers.water[today]=Math.max(0,cur-1); save('trackers'); render(); };
+  } else if(trackerSubtab==='books'){
+    const books = state.trackers.books;
+    main.innerHTML += `
+      <div class="card">
+        <div class="row">
+          <div><label>Название</label><input type="text" id="b-title"></div>
+          <div><label>Всего страниц</label><input type="number" id="b-total"></div>
+        </div>
+        <div class="btn-row"><button id="b-add">Добавить книгу</button></div>
+      </div>
+      <div id="b-list">
+        ${books.map(b=>{
+          const pct = b.totalPages ? Math.min(100, Math.round(b.currentPage/b.totalPages*100)) : 0;
+          return `<div class="book-item">
+            <div style="display:flex;justify-content:space-between;">
+              <span class="book-title">${b.title}</span>
+              <button class="del" data-id="${b.id}">убрать</button>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:var(--coral);"></div></div>
+            <div class="row" style="margin-top:8px;align-items:center;">
+              <input type="number" class="b-page" data-id="${b.id}" value="${b.currentPage}" style="max-width:100px;">
+              <span class="muted">из ${b.totalPages} стр · ${pct}%</span>
+            </div>
+          </div>`;
+        }).join('') || '<div class="empty">Пока нет книг в списке</div>'}
+      </div>
+    `;
+    main.querySelector('#b-add').onclick = ()=>{
+      const title = main.querySelector('#b-title').value.trim();
+      const totalPages = parseInt(main.querySelector('#b-total').value)||0;
+      if(!title) return;
+      state.trackers.books.push({ id:uid(), title, totalPages, currentPage:0 });
+      save('trackers'); render();
+    };
+    main.querySelectorAll('.del').forEach(b=>{
+      b.onclick = ()=>{ state.trackers.books = state.trackers.books.filter(x=>x.id!==b.dataset.id); save('trackers'); render(); };
+    });
+    main.querySelectorAll('.b-page').forEach(inp=>{
+      inp.onchange = ()=>{
+        const book = state.trackers.books.find(x=>x.id===inp.dataset.id);
+        if(book){ book.currentPage = parseInt(inp.value)||0; save('trackers'); render(); }
+      };
+    });
+  } else if(trackerSubtab==='skincare'){
+    const done = state.trackers.skincare[today] || [];
+    const tasks = state.trackers.skincareTasks;
+    main.innerHTML += `
+      <div class="card">
+        <div class="check-grid">
+          ${tasks.map(t=>`
+            <label class="check-item">
+              <input type="checkbox" data-task="${t}" ${done.includes(t)?'checked':''}>
+              <span style="flex:1;">${t}</span>
+              <span class="del" data-task-del="${t}" style="cursor:pointer;font-size:11px;color:var(--ink-soft);">×</span>
+            </label>
+          `).join('')}
+        </div>
+        <div class="row" style="margin-top:12px;">
+          <input type="text" id="sc-new" placeholder="добавить свой пункт, например «маска для волос»">
+          <button id="sc-add">Добавить</button>
+        </div>
+      </div>
+    `;
+    main.querySelectorAll('.check-item input[type=checkbox]').forEach(cb=>{
+      cb.onchange = ()=>{
+        let arr = state.trackers.skincare[today] || [];
+        if(cb.checked) arr = [...new Set([...arr, cb.dataset.task])];
+        else arr = arr.filter(t=>t!==cb.dataset.task);
+        state.trackers.skincare[today] = arr;
+        save('trackers');
+      };
+    });
+    main.querySelectorAll('[data-task-del]').forEach(x=>{
+      x.onclick = (e)=>{
+        e.preventDefault();
+        const t = x.dataset.taskDel;
+        state.trackers.skincareTasks = state.trackers.skincareTasks.filter(x2=>x2!==t);
+        Object.keys(state.trackers.skincare).forEach(d=>{
+          state.trackers.skincare[d] = state.trackers.skincare[d].filter(x2=>x2!==t);
+        });
+        save('trackers'); render();
+      };
+    });
+    main.querySelector('#sc-add').onclick = ()=>{
+      const val = main.querySelector('#sc-new').value.trim();
+      if(!val || state.trackers.skincareTasks.includes(val)) return;
+      state.trackers.skincareTasks.push(val);
+      save('trackers'); render();
+    };
+  } else {
+    const customs = state.trackers.custom;
+    const doneToday = state.trackers.customLog[today] || [];
+    main.innerHTML += `
+      <div class="card">
+        <div class="row">
+          <div><label>Название пункта</label><input type="text" id="c-name" placeholder="например, растяжка"></div>
+          <div><label>Описание</label><input type="text" id="c-desc" placeholder="необязательно"></div>
+        </div>
+        <div class="btn-row"><button id="c-add">Добавить пункт</button></div>
+      </div>
+      <div id="c-list">
+        ${customs.map(c=>`
+          <div class="custom-item">
+            <div>
+              <div class="ci-name">${escapeHtml(c.name)}</div>
+              ${c.description ? `<div class="ci-desc">${escapeHtml(c.description)}</div>` : ''}
+            </div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <label><input type="checkbox" class="c-check" data-id="${c.id}" ${doneToday.includes(c.id)?'checked':''}>сегодня</label>
+              <button class="del" data-id="${c.id}">убрать</button>
+            </div>
+          </div>
+        `).join('') || '<div class="empty">Пока нет своих пунктов — добавь то, что хочешь отслеживать</div>'}
+      </div>
+    `;
+    main.querySelector('#c-add').onclick = ()=>{
+      const name = main.querySelector('#c-name').value.trim();
+      const description = main.querySelector('#c-desc').value.trim();
+      if(!name) return;
+      state.trackers.custom.push({ id:uid(), name, description });
+      save('trackers'); render();
+    };
+    main.querySelectorAll('#c-list .del').forEach(b=>{
+      b.onclick = ()=>{
+        state.trackers.custom = state.trackers.custom.filter(c=>c.id!==b.dataset.id);
+        Object.keys(state.trackers.customLog).forEach(d=>{
+          state.trackers.customLog[d] = state.trackers.customLog[d].filter(id=>id!==b.dataset.id);
+        });
+        save('trackers'); render();
+      };
+    });
+    main.querySelectorAll('.c-check').forEach(cb=>{
+      cb.onchange = ()=>{
+        let arr = state.trackers.customLog[today] || [];
+        if(cb.checked) arr = [...new Set([...arr, cb.dataset.id])];
+        else arr = arr.filter(id=>id!==cb.dataset.id);
+        state.trackers.customLog[today] = arr;
+        save('trackers');
+      };
+    });
+  }
+  main.querySelectorAll('.subtab').forEach(s=>{
+    s.onclick = ()=>{ trackerSubtab = s.dataset.sub; render(); };
+  });
+}
+
+/* ---------- CALENDAR ---------- */
+const dowLabels = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const monthLabels = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+
+function renderCalendar(main){
+  const today = todayISO();
+  const { year, month } = calView;
+  const first = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const offset = (first.getDay()+6) % 7;
+  const monthPrefix = `${year}-${String(month+1).padStart(2,'0')}`;
+
+  const workoutsByDate = {};
+  state.calendar.workouts.forEach(w=>{
+    (workoutsByDate[w.date] = workoutsByDate[w.date] || []).push(w);
+  });
+  const monthWorkouts = state.calendar.workouts.filter(w=>w.date.startsWith(monthPrefix));
+  const doneCount = monthWorkouts.filter(w=>w.done).length;
+
+  let cells = '';
+  for(let i=0;i<offset;i++) cells += `<div class="cal-cell empty"></div>`;
+  for(let d=1; d<=daysInMonth; d++){
+    const iso = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const list = workoutsByDate[iso] || [];
+    const allDone = list.length && list.every(w=>w.done);
+    cells += `<div class="cal-cell ${iso===today?'today':''} ${iso===calSelected?'selected':''} ${allDone?'done':''}" data-date="${iso}">
+      <span>${d}</span>
+      ${list.length ? `<span class="cal-dots">${list.map(()=>'<span></span>').join('')}</span>` : ''}
+    </div>`;
+  }
+
+  main.innerHTML += `
+    <h1>Календарь тренировок</h1>
+    <div class="stat-row">
+      <div class="stat"><div class="num">${doneCount} / ${monthWorkouts.length}</div><div class="lbl">выполнено в этом месяце</div></div>
+    </div>
+    <div class="card">
+      <div class="cal-head">
+        <button class="ghost nav-btn" id="cal-prev">← пред.</button>
+        <span class="cal-month">${monthLabels[month]} ${year}</span>
+        <button class="ghost nav-btn" id="cal-next">след. →</button>
+      </div>
+      <div class="cal-grid">
+        ${dowLabels.map(d=>`<div class="cal-dow">${d}</div>`).join('')}
+        ${cells}
+      </div>
+    </div>
+    <div class="card">
+      <div class="muted" style="margin-bottom:8px;">${fmtDate(calSelected)}</div>
+      <div class="list" id="cal-wlist">
+        ${(workoutsByDate[calSelected]||[]).map(w=>`
+          <div class="workout-item ${w.done?'done':''}">
+            <input type="checkbox" class="w-done" data-id="${w.id}" ${w.done?'checked':''}>
+            <div style="flex:1;">
+              <div class="wi-title">${escapeHtml(w.title)}</div>
+              ${w.note ? `<div class="muted">${escapeHtml(w.note)}</div>` : ''}
+            </div>
+            <button class="del" data-id="${w.id}">убрать</button>
+          </div>
+        `).join('') || '<div class="empty">На эту дату тренировок не запланировано</div>'}
+      </div>
+      <div class="row" style="margin-top:12px;">
+        <div><label>Тренировка</label><input type="text" id="w-title" placeholder="например, силовая"></div>
+        <div><label>Заметка</label><input type="text" id="w-note" placeholder="необязательно"></div>
+      </div>
+      <div class="btn-row"><button id="w-add">Добавить на ${fmtDate(calSelected)}</button></div>
+    </div>
+  `;
+
+  main.querySelector('#cal-prev').onclick = ()=>{
+    calView.month--; if(calView.month<0){ calView.month=11; calView.year--; }
+    render();
+  };
+  main.querySelector('#cal-next').onclick = ()=>{
+    calView.month++; if(calView.month>11){ calView.month=0; calView.year++; }
+    render();
+  };
+  main.querySelectorAll('.cal-cell[data-date]').forEach(c=>{
+    c.onclick = ()=>{ calSelected = c.dataset.date; render(); };
+  });
+  main.querySelector('#w-add').onclick = ()=>{
+    const title = main.querySelector('#w-title').value.trim();
+    if(!title) return;
+    const note = main.querySelector('#w-note').value.trim();
+    state.calendar.workouts.push({ id:uid(), date:calSelected, title, note, done:false });
+    save('calendar'); render();
+  };
+  main.querySelectorAll('.w-done').forEach(cb=>{
+    cb.onchange = ()=>{
+      const w = state.calendar.workouts.find(x=>x.id===cb.dataset.id);
+      if(w){ w.done = cb.checked; save('calendar'); render(); }
+    };
+  });
+  main.querySelectorAll('#cal-wlist .del').forEach(b=>{
+    b.onclick = ()=>{
+      state.calendar.workouts = state.calendar.workouts.filter(w=>w.id!==b.dataset.id);
+      save('calendar'); render();
+    };
+  });
+}
+
+/* ---------- BLOG (photo diary) ---------- */
+let blogDraftPhotos = [];
+
+function compressImage(file){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const maxDim = 900;
+        let { width, height } = img;
+        if(width > maxDim || height > maxDim){
+          if(width > height){ height = Math.round(height*maxDim/width); width = maxDim; }
+          else { width = Math.round(width*maxDim/height); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = reject;
+      img.src = reader.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderBlogDraftPreview(main){
+  const wrap = main.querySelector('#bl-photo-preview');
+  if(!wrap) return;
+  wrap.innerHTML = blogDraftPhotos.map((src,i)=>`
+    <div style="position:relative;">
+      <img src="${src}" style="width:84px;height:84px;object-fit:cover;border-radius:8px;border:1px solid var(--line);">
+      <span class="del" data-idx="${i}" style="position:absolute;top:-6px;right:-6px;background:var(--ink);color:var(--paper-2);border-radius:50%;width:18px;height:18px;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;">×</span>
+    </div>
+  `).join('');
+  wrap.querySelectorAll('.del').forEach(x=>{
+    x.onclick = ()=>{ blogDraftPhotos.splice(Number(x.dataset.idx),1); renderBlogDraftPreview(main); };
+  });
+}
+
+function renderBlog(main){
+  const posts = state.blog.posts;
+  main.innerHTML += `
+    <h1>Блог — дневник</h1>
+    <div class="card">
+      <div class="row">
+        <div style="min-width:100%;"><label>Заголовок</label><input type="text" id="bl-title"></div>
+      </div>
+      <div style="margin-top:8px;"><label>Текст</label><textarea id="bl-text" placeholder="О чём хочешь написать сегодня?"></textarea></div>
+      <div style="margin-top:10px;">
+        <label>Фото</label>
+        <input type="file" id="bl-photo-input" accept="image/*" multiple>
+        <div id="bl-photo-preview" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;"></div>
+      </div>
+      <div class="btn-row"><button id="bl-add">Опубликовать</button></div>
+    </div>
+    <div id="bl-list">
+      ${posts.slice().reverse().map(p=>`
+        <div class="blog-post">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;">
+            <h3>${escapeHtml(p.title)}</h3>
+            <button class="del" data-id="${p.id}">удалить</button>
+          </div>
+          <div class="blog-date">${fmtDate(p.date)}</div>
+          ${p.text ? `<div class="blog-text">${escapeHtml(p.text)}</div>` : ''}
+          ${(p.photos&&p.photos.length) ? `<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+            ${p.photos.map(src=>`<img src="${src}" style="width:130px;height:130px;object-fit:cover;border-radius:8px;border:1px solid var(--line);">`).join('')}
+          </div>` : ''}
+        </div>
+      `).join('') || '<div class="empty">Пока нет записей</div>'}
+    </div>
+  `;
+  renderBlogDraftPreview(main);
+  main.querySelector('#bl-photo-input').onchange = async (e)=>{
+    const files = Array.from(e.target.files);
+    for(const f of files){
+      try{ blogDraftPhotos.push(await compressImage(f)); }catch(err){ /* skip failed image */ }
+    }
+    e.target.value = '';
+    renderBlogDraftPreview(main);
+  };
+  main.querySelector('#bl-add').onclick = ()=>{
+    const title = main.querySelector('#bl-title').value.trim();
+    const text = main.querySelector('#bl-text').value.trim();
+    if(!title || (!text && !blogDraftPhotos.length)) return;
+    state.blog.posts.push({ id:uid(), date:todayISO(), title, text, photos:[...blogDraftPhotos] });
+    blogDraftPhotos = [];
+    save('blog'); render();
+  };
+  main.querySelectorAll('#bl-list .del').forEach(b=>{
+    b.onclick = ()=>{ state.blog.posts = state.blog.posts.filter(p=>p.id!==b.dataset.id); save('blog'); render(); };
+  });
+}
+
+loadAll();
+</script>
+</body>
+</html>
